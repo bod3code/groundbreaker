@@ -4,6 +4,7 @@
  *  this isn't testing your CSS skills!
  *    1: Right now we are only showing the first post.
  *       The robots would like to see _all 10_ posts on this page.
+ *        OK Robots, the page will now show *all* posts.
  *    2: Right now we are only showing the post's body text and posted date.
  *       The robots would also like to _see the author's name_ for each
  *       of the 10 posts, rather than the words "Unknown Author"
@@ -59,21 +60,23 @@ export default compose(
   branch(({ data: { loading } }) => loading, renderComponent(Loading)),
   mapProps(props => ({
     ...props,
-    post: props.data.posts[0]
+    posts: props.data.posts
   })),
   withState("hideBody", "setHideBody", false)
 )(BlogPostsDisplay);
 
-function BlogPostsDisplay({ post }) {
-  return (
-    <>
-      <Button>Show Authors Only</Button>
-      <SubHeading>Post by: Unknown Author</SubHeading>
-      <Dateline>
-        <div>on {post.posted}</div>
-        <Link to={`/post/${post.id}#comments`}>Go to comments</Link>
-      </Dateline>
-      <BodyText>{post.body}</BodyText>
-    </>
-  );
+function BlogPostsDisplay({ posts }) {
+  return posts.map(post => {
+    return (
+      <>
+        <Button>Show Authors Only</Button>
+        <SubHeading>Post by: Unknown Author</SubHeading>
+        <Dateline>
+          <div>on {post.posted}</div>
+          <Link to={`/post/${post.id}#comments`}>Go to comments</Link>
+        </Dateline>
+        <BodyText>{post.body}</BodyText>
+      </>
+    );
+  });
 }
