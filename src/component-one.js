@@ -8,6 +8,7 @@
  *    2: Right now we are only showing the post's body text and posted date.
  *       The robots would also like to _see the author's name_ for each
  *       of the 10 posts, rather than the words "Unknown Author"
+ *       OK Robots, the page now shows the *author* name
  *    3: Right now there's a _button that does nothing_!  Make it hide
  *       every post body (`post.body`) on the page so you can just see
  *       the author heading and dateline.
@@ -46,6 +47,9 @@ export default compose(
           id
           body
           posted
+          author {
+            name
+          }
         }
       }
     `,
@@ -70,7 +74,7 @@ function BlogPostsDisplay({ posts }) {
     return (
       <>
         <Button>Show Authors Only</Button>
-        <SubHeading>Post by: Unknown Author</SubHeading>
+        <SubHeading>Post by: {post.author.name}</SubHeading>
         <Dateline>
           <div>on {post.posted}</div>
           <Link to={`/post/${post.id}#comments`}>Go to comments</Link>
