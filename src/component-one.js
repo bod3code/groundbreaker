@@ -12,6 +12,7 @@
  *    3: Right now there's a _button that does nothing_!  Make it hide
  *       every post body (`post.body`) on the page so you can just see
  *       the author heading and dateline.
+ *       OK Robots, the page now toggles the `post.body` onClick of the button
  *
  *  The following documentation will be helpful:
  *  Recompose:  https://github.com/acdlite/recompose/blob/master/docs/API.md
@@ -24,7 +25,8 @@ import {
   compose,
   mapProps,
   renderComponent,
-  withState
+  withState,
+  withHandlers
 } from "recompose";
 
 import {
@@ -66,20 +68,25 @@ export default compose(
     ...props,
     posts: props.data.posts
   })),
-  withState("hideBody", "setHideBody", false)
+  withState("hideBody", "setHideBody", false),
+  withHandlers({     
+      toggle: ({ hideBody, setHideBody }) => () => {
+        setHideBody(!hideBody);
+    }
+  })
 )(BlogPostsDisplay);
 
-function BlogPostsDisplay({ posts }) {
+function BlogPostsDisplay({ posts, toggle, hideBody }) {
   return posts.map(post => {
     return (
       <>
-        <Button>Show Authors Only</Button>
+        <Button onClick={ toggle } >Show {hideBody ? "Post Body" : "Authors Only" }</Button>
         <SubHeading>Post by: {post.author.name}</SubHeading>
         <Dateline>
           <div>on {post.posted}</div>
           <Link to={`/post/${post.id}#comments`}>Go to comments</Link>
         </Dateline>
-        <BodyText>{post.body}</BodyText>
+        {!hideBody && <BodyText>{post.body}</BodyText>}
       </>
     );
   });
