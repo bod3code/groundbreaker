@@ -1,38 +1,99 @@
-/**
- *  Please see the instructions on the homepage for the user
- *  story we'd like to see implemented on this page.
- *
- *  For the purpose of this exercise, assume that we
- *  _cannot change the backend API_ although certainly some of the
- *  requirements might arguably best be solved with an API change.
- *
- *  Otherwise we only ask that you:
- *   1.  use react, and
- *   2.  your best judgement as a software engineer.
- *
- *  Note the router is already set up for you, and you will
- *  receive the id of the post from the route at `props.match.params.id`
- */
-
 import React from "react";
+import {
+  branch,
+  compose,
+  mapProps,
+  renderComponent,
+  withHandlers,
+  withState
+} from "recompose";
 
-/* The components below should be enough to complete this exercise. */
 import {
   Button,
   Comment,
-  /**
-   * Here's an example of the Comment component API.
-   *  <Comment
-   *    author="Example Author"
-   *    commentText="Example text"
-   *    date={new Date().toISOString()}
-   *  />
-   */
   Dateline,
-  Link,
   Loading,
   BodyText,
   SubHeading
 } from "./component-lib";
 
-export default props => <div>You'll build this next</div>;
+import { graphql } from "react-apollo";
+import gql from "graphql-tag";
+
+export default compose(
+  graphql(
+    gql`
+    query postById($id: ID!) {
+      post(id: $id) {
+        id
+        body
+        posted
+        author {
+          name
+        }
+        comments {
+          id
+          body
+          posted
+          author {
+            name
+          }
+        }
+      }
+    }
+    `,
+    {
+      options: props => {
+        return {
+          variables: { id: props.match.params.id }
+        };
+      }
+    }
+    ),
+    branch(({ data: { loading } }) => loading, renderComponent(Loading)),
+    mapProps(props => ({
+      ...props,
+      post: props.data.post,
+      comments: props.data.post.comments
+    })),
+    withState("hideComments", "setHideComments", false),
+    withHandlers({
+      toggle: ({ hideComments, setHideComments }) => () => {
+        setHideComments(!hideComments);
+      }
+    })
+    )(BlogPostWithComments);
+    
+    function BlogPostWithComments({ post, comments, toggle, hideComments }) {
+      return (
+        <>
+        <SubHeading>Post by: {post.author.name}</SubHeading>
+        <Dateline>
+        <div>on {post.posted}</div>
+        </Dateline>
+        <BodyText>{post.body}</BodyText>
+        { !comments.length ?
+          <div>No Comments</div>
+          :
+            <Button onClick={toggle}>
+            {hideComments ? "Show Comments" : "Hide Comments"}
+            </Button>
+    }
+            {(!hideComments  &&
+              comments
+              .sort((a, b) => new Date(b.posted) - new Date(a.posted))
+              .map(comment => {
+                return (
+                  <Comment
+                  key={comment.id}
+                  author={comment.author.name}
+                  commentText={comment.body}
+                  date={new Date(comment.posted).toISOString()}
+                  />
+                  );
+                }
+                )
+                )}
+              </>
+              );
+            }
