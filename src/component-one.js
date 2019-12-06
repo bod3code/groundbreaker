@@ -79,7 +79,7 @@ export default compose(
 function BlogPostsDisplay({ posts, toggle, hideBody }) {
   return posts.map(post => {
     return (
-      <>
+      <React.Fragment key={post.id}>
         <Button onClick={ toggle } >Show {hideBody ? "Post Body" : "Authors Only" }</Button>
         <SubHeading>Post by: {post.author.name}</SubHeading>
         <Dateline>
@@ -87,7 +87,7 @@ function BlogPostsDisplay({ posts, toggle, hideBody }) {
           <Link to={`/post/${post.id}#comments`}>Go to comments</Link>
         </Dateline>
         {!hideBody && <BodyText>{post.body}</BodyText>}
-      </>
+      </React.Fragment>
     );
   });
 }
